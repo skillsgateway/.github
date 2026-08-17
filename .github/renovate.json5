@@ -1,0 +1,124 @@
+// Shared Renovate preset for @skillsgateway, and this repository's own config.
+//
+// Extend it from a repository with a single line:
+//
+//   { extends: ["github>skillsgateway/.github//.github/renovate.json5"] }
+//
+// Repository-specific rules — dependency groupings, ecosystem pins — go in that
+// file alongside the extends, not here.
+//
+// LABELS REFERENCED BELOW MUST EXIST ON THE CONSUMING REPOSITORY. Renovate does
+// not create labels, and silently drops any that do not exist, so a label that
+// was never created means the rule referencing it does nothing at all. Required:
+//
+//   bot-renovate, bot-renovate-stop, bot-renovate-rebase, security,
+//   renovate-version-major, renovate-version-minor,
+//   renovate-version-patch, renovate-version-digest
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+  ],
+
+  // Dependency PRs land as `chore(<datasource>): ...`, which keeps them valid
+  // Conventional Commits — the PR title becomes the commit subject on main.
+  semanticCommits: "enabled",
+  semanticCommitType: "chore",
+  semanticCommitScope: "{{datasource}}",
+
+  branchPrefix: "renovate/",
+
+  // Backstop: converts a range back to an exact pin if one ever creeps in.
+  rangeStrategy: "pin",
+
+  addLabels: ["bot-renovate"],
+
+  // Functional rather than decorative — add this label to a PR to stop Renovate
+  // updating or rebasing it any further.
+  stopUpdatingLabel: "bot-renovate-stop",
+  // The inverse. Renamed only to match the label above; the default is "rebase".
+  rebaseLabel: "bot-renovate-rebase",
+
+  dependencyDashboard: false,
+
+  prConcurrentLimit: 10,
+  prHourlyLimit: 5,
+
+  separateMajorMinor: true,
+  separateMultipleMajor: true,
+
+  lockFileMaintenance: {
+    enabled: true,
+  },
+
+  vulnerabilityAlerts: {
+    enabled: true,
+    addLabels: ["security"],
+  },
+
+  osvVulnerabilityAlerts: true,
+
+  packageRules: [
+    // =====================================================
+    // Version classification labels.
+    //
+    // Every Renovate PR states its own risk tier at a glance, including one
+    // sitting open because its checks failed.
+    //
+    // minimumReleaseAge is a supply-chain mitigation, not noise reduction: a
+    // malicious or compromised version is usually caught and pulled within a
+    // few days, so merging a same-day release means installing it before
+    // anyone has had a chance to notice. It costs nothing for a legitimate
+    // release.
+    // =====================================================
+    {
+      matchUpdateTypes: ["major"],
+      addLabels: ["renovate-version-major"],
+      minimumReleaseAge: "7 days",
+    },
+    {
+      matchUpdateTypes: ["minor"],
+      addLabels: ["renovate-version-minor"],
+      minimumReleaseAge: "3 days",
+    },
+    {
+      matchUpdateTypes: ["patch"],
+      addLabels: ["renovate-version-patch"],
+      minimumReleaseAge: "3 days",
+    },
+    {
+      matchUpdateTypes: ["digest"],
+      addLabels: ["renovate-version-digest"],
+    },
+
+    // =====================================================
+    // GitHub Actions.
+    //
+    // Commit metadata only — no automerge. Actions are SHA-pinned precisely so
+    // a re-pointed upstream tag cannot silently change what runs, and
+    // minimumReleaseAge does not cover that case: re-pointing a tag on an
+    // existing release creates no new release for the age check to measure.
+    // =====================================================
+    {
+      matchManagers: ["github-actions"],
+      semanticCommitType: "chore",
+      semanticCommitScope: "github-actions",
+    },
+  ],
+
+  // =====================================================
+  // Automerge is deliberately OFF.
+  //
+  // Two reasons, either of which is sufficient. Merging in this organization is
+  // a human step taken through the web UI. And `allow_auto_merge` is false on
+  // the product repository because it is private on a free plan, so platform
+  // automerge could not be honoured there anyway — Renovate would fall back to
+  // merging via the API, on a main branch that currently has no protection and
+  // no required checks.
+  //
+  // To enable later: add `automerge: true` and `platformAutomerge: true` to the
+  // minor and patch rules above, and leave major and digest without it.
+  // =====================================================
+}

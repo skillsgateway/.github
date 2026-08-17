@@ -1,0 +1,9 @@
+# Blank issues are disabled so that every issue arrives with the template's
+# questions already answered. `triage` is applied by all three templates —
+# GitHub silently drops a label that does not exist on the repository, so it has
+# to be created there first.
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/skillsgateway/.github/security/advisories/new
+    about: Report privately. Please do not open a public issue for a vulnerability.

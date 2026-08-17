@@ -1,0 +1,37 @@
+# Reusable: validates a Renovate config against the current schema.
+#
+# workflow_dispatch is on the *calling* workflow's side, but worth knowing why
+# it matters: Renovate's schema evolves server-side, so a config that validated
+# last month can start failing with no commit here to trigger a re-check.
+
+name: Validate Renovate config
+
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        description: "Path to the Renovate config, relative to the repository root"
+        required: false
+        type: string
+        default: ".github/renovate.json5"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Renovate config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Validate ${{ inputs.config-path }}
+        env:
+          CONFIG_PATH: ${{ inputs.config-path }}
+        run: npx --yes --package renovate@44 -- renovate-config-validator "$CONFIG_PATH"

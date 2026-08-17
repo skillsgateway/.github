@@ -1,0 +1,28 @@
+# This repository's own check. The file it validates is also the shared preset
+# every other repository extends, so a mistake here breaks Renovate everywhere
+# at once rather than in one place.
+
+name: Validate Renovate config
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/renovate.json5"
+      - ".github/workflows/validate-renovate.yml"
+      - ".github/workflows/common-validate-renovate.yml"
+  pull_request:
+    paths:
+      - ".github/renovate.json5"
+      - ".github/workflows/validate-renovate.yml"
+      - ".github/workflows/common-validate-renovate.yml"
+  # Renovate's schema changes server-side, so a config that passed last month can
+  # break with no commit here to trigger a re-check.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    uses: ./.github/workflows/common-validate-renovate.yml

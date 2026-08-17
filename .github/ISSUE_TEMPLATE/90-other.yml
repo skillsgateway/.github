@@ -1,0 +1,25 @@
+name: Other
+description: Anything that is not a bug report or a feature request
+labels: ["triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a bug or a feature, use the dedicated templates — they ask the
+        questions that would otherwise be the first reply.
+
+        **Do not report security vulnerabilities here.** Use a
+        [private security advisory](https://github.com/skillsgateway/.github/security/advisories/new)
+        instead.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
