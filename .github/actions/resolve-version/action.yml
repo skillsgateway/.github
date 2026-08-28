@@ -25,6 +25,15 @@ inputs:
     description: "Path to the resolved cliff.toml."
     required: false
     default: "/tmp/cliff.toml"
+  github-token:
+    description: >-
+      Token for git-cliff's GitHub integration. Required whenever the resolved
+      cliff.toml's template reads `commit.remote` (a PR number, an author
+      handle): git-cliff then calls the repository's commits API even for
+      `--bumped-version`, which needs none of that metadata, and an
+      unauthenticated call is answered with 403 and exits 101.
+    required: false
+    default: ""
 
 outputs:
   version:
@@ -51,6 +60,7 @@ runs:
         KIND: ${{ inputs.prerelease }}
         FORMAT: ${{ inputs.version-format }}
         CLIFF_CONFIG: ${{ inputs.cliff-config }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         set -euo pipefail
         AUTO="$(git-cliff --config "$CLIFF_CONFIG" --bumped-version)"
