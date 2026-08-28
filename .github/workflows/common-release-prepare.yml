@@ -122,6 +122,10 @@ jobs:
           version-format: ${{ inputs.version-format }}
           prerelease: ${{ inputs.prerelease }}
           force: ${{ inputs.force }}
+          # Same token the changelog step below passes, for the same reason: a
+          # cliff.toml template that reads `commit.remote` makes even
+          # `--bumped-version` call the commits API.
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # The input is validated above; this validates what was *computed* from it,
       # which until now nothing did.
