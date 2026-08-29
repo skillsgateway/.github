@@ -1,0 +1,106 @@
+# The product repo. Everything here assumes the product CI exists on the repo,
+# which is what separates it from `meta.yml`.
+suborgrepos:
+  - skillsgateway
+
+# Workaround for safe-settings shared-object mutation bug:
+# Without a suborg entry, all repos share the same repoConfig reference via
+# Object.assign() mutation. Adding a suborg causes mergeDeep({}, ...) which
+# creates a fresh object per repo, giving each repo its correct name.
+repository:
+  homepage: https://skillsgateway.github.io/skillsgateway/
+
+# Defined at suborg scope (not org-level settings.yml) so safe-settings
+# creates these as per-repo rulesets via /repos/{owner}/{repo}/rulesets.
+# Organization rulesets require GitHub Team; repository rulesets are free.
+rulesets:
+  - name: protect-main
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include: ["~DEFAULT_BRANCH"]
+        exclude: []
+    bypass_actors:
+      # Sole-maintainer org: the 1-approval review requirement below is
+      # real four-eyes only when a second reviewer exists; until then the
+      # org admin bypasses it at merge time (deliberate, per issue #23).
+      #
+      # Renovate deliberately gets NO bypass here, unlike reqstool. A
+      # `pull_request` bypass would exempt its PRs from the required checks
+      # too, and auto-merge would then land a dependency bump the moment it is
+      # mergeable rather than when CI is green. The review requirement is
+      # satisfied by the renovate-approve App instead, which leaves every check
+      # enforced.
+      - actor_id: 1
+        actor_type: OrganizationAdmin
+        bypass_mode: always
+    rules:
+      - type: deletion
+      - type: non_fast_forward
+      - type: pull_request
+        parameters:
+          required_approving_review_count: 1
+          dismiss_stale_reviews_on_push: true
+          require_code_owner_review: false
+          require_last_push_approval: false
+          # Required by the repository-ruleset pull_request schema; omitting
+          # it fails validation with "data matches no possible input".
+          # All review threads must be resolved before a PR can be merged.
+          required_review_thread_resolution: true
+      - type: required_status_checks
+        parameters:
+          strict_required_status_checks_policy: false
+          required_status_checks:
+            # The PR gates. integration 15368 is GitHub Actions, so a check of
+            # the same name from another app cannot satisfy them.
+            #
+            # A context GitHub has never seen blocks every PR, so a new check
+            # here must have run at least once on a real PR before it is added.
+            - context: Build & gates
+              integration_id: 15368
+            - context: Portal e2e
+              integration_id: 15368
+            - context: Traceability & spec gates
+              integration_id: 15368
+            - context: Documentation (strict)
+              integration_id: 15368
+            # Split out of `Build & gates` so the real chromium it needs stops
+            # competing with the Java build for CPU (skillsgateway#103).
+            - context: Storybook tests
+              integration_id: 15368
+            # Reusable workflows report as "<caller job> / <called job>". The
+            # caller job is `semantic-pr` in check-semantic-pr.yml; renaming
+            # either job silently renames this context and the requirement
+            # stops matching anything.
+            - context: semantic-pr / Validate PR title
+              integration_id: 15368
+            # The API-contract gate. Required as of 2026-08-29: it had run
+            # green on real PRs for weeks while merging red was still possible,
+            # which made the contract advisory rather than enforced.
+            - context: Breaking change detection
+              integration_id: 15368
+
+# Environments the release flow binds to (issue #23: reqstool binds its
+# release approval gate to `stable`; same shape here for when the release
+# workflow lands).
+environments:
+  # The approval gate for release publishing — the steps that cannot be
+  # taken back. Self-review is allowed on purpose: the maintainer who
+  # dispatches a release is normally the one who approves it, and the
+  # second pair of eyes was the PR review that got the commits onto main.
+  - name: stable
+    prevent_self_review: false
+    wait_timer: 0
+    reviewers:
+      - id: 1577689 # jimisola
+        type: User
+    deployment_branch_policy:
+      protected_branches: true
+      custom_branch_policies: false
+
+  # The non-stable target. No reviewer: dev builds land here on every push
+  # to main, and a gate would mean approving each one by hand.
+  - name: test
+    wait_timer: 0
+    deployment_branch_policy: ~

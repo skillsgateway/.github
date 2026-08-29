@@ -1,0 +1,48 @@
+# This repo: the organization profile, the shared workflows, and -- since the
+# migration off `.github-private` -- the safe-settings configuration itself.
+# Managed like any other repo, with its own protection, because the product CI
+# does not run here.
+#
+# It being public is what makes that protection possible at all: repository
+# rulesets are a paid feature on private repos, which is why the configuration
+# could not protect its old private home.
+#
+# A required status check that a repo never produces blocks every PR on it
+# forever, so `protect-main` from `product.yml` cannot simply be widened to
+# cover these. The rules below are the subset that means something on a repo
+# whose only checks are DCO and, in `.github-private`, the safe-settings sync
+# itself.
+# Note there is no required-status-checks rule. `validate-renovate` is
+# path-filtered, so a PR that does not touch `renovate.json5` never produces
+# that context -- and a required context a PR never produces blocks it forever.
+suborgrepos:
+  - .github
+
+# Workaround for safe-settings shared-object mutation bug:
+# Without a suborg entry, all repos share the same repoConfig reference via
+# Object.assign() mutation. Adding a suborg causes mergeDeep({}, ...) which
+# creates a fresh object per repo, giving each repo its correct name.
+repository: {}
+
+rulesets:
+  - name: protect-main-meta
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include: ["~DEFAULT_BRANCH"]
+        exclude: []
+    bypass_actors:
+      - actor_id: 1
+        actor_type: OrganizationAdmin
+        bypass_mode: always
+    rules:
+      - type: deletion
+      - type: non_fast_forward
+      - type: pull_request
+        parameters:
+          required_approving_review_count: 1
+          dismiss_stale_reviews_on_push: true
+          require_code_owner_review: false
+          require_last_push_approval: false
+          required_review_thread_resolution: true

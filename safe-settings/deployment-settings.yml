@@ -1,0 +1,13 @@
+# Every repo in the org is managed, including the two meta repos. safe-settings
+# excludes `admin`, `.github` and `safe-settings` by default when this file is
+# absent -- an empty exclude list is what overrides that default, so removing
+# the file would silently restore it.
+#
+# The meta repos need different protection from the product repo (no product CI
+# runs there), so they are a separate suborg rather than an exclusion. See
+# `suborgs/meta.yml`.
+#
+# Archived repos belong here if any are ever created: they are read-only, and a
+# failed write to one fails the entire sync.
+restrictedRepos:
+  exclude: []
