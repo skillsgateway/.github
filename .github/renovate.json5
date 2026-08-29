@@ -82,11 +82,13 @@
       matchUpdateTypes: ["minor"],
       addLabels: ["renovate-version-minor"],
       minimumReleaseAge: "3 days",
+      automerge: true,
     },
     {
       matchUpdateTypes: ["patch"],
       addLabels: ["renovate-version-patch"],
       minimumReleaseAge: "3 days",
+      automerge: true,
     },
     {
       matchUpdateTypes: ["digest"],
@@ -109,16 +111,27 @@
   ],
 
   // =====================================================
-  // Automerge is deliberately OFF.
+  // Automerge: minor and patch only.
   //
-  // Two reasons, either of which is sufficient. Merging in this organization is
-  // a human step taken through the web UI. And `allow_auto_merge` is false on
-  // the product repository because it is private on a free plan, so platform
-  // automerge could not be honoured there anyway — Renovate would fall back to
-  // merging via the API, on a main branch that currently has no protection and
-  // no required checks.
+  // `platformAutomerge: false` means Renovate merges the PR itself on its next
+  // run rather than asking GitHub to auto-merge it. Both wait for CI, but they
+  // wait for different things: GitHub's auto-merge waits only for the checks
+  // `protect-main` lists as required, while Renovate waits for the branch to be
+  // green outright. That difference covers CodeQL and the DCO check, which run
+  // on every PR and are not in the required set -- and it means adding a new
+  // workflow does not silently fall outside the automerge gate until someone
+  // remembers to require it.
   //
-  // To enable later: add `automerge: true` and `platformAutomerge: true` to the
-  // minor and patch rules above, and leave major and digest without it.
+  // The approving review the ruleset requires comes from the renovate-approve
+  // App, which only ever approves PRs authored by Renovate. Renovate itself has
+  // no ruleset bypass -- an exemption would skip the checks too, which is
+  // exactly what must not happen for an unattended merge.
+  //
+  // Major stays manual: a major is a behaviour change worth a human reading the
+  // changelog, and `minimumReleaseAge: 7 days` already says these are not
+  // urgent. Digests stay manual because a re-pointed tag is the supply-chain
+  // case SHA pinning exists to catch.
   // =====================================================
+  automergeType: "pr",
+  platformAutomerge: false,
 }
