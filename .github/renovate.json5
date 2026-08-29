@@ -13,7 +13,7 @@
 //
 //   bot-renovate, bot-renovate-stop, bot-renovate-rebase, security,
 //   renovate-version-major, renovate-version-minor,
-//   renovate-version-patch, renovate-version-digest
+//   renovate-version-patch, renovate-version-pin, renovate-version-digest
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
 
@@ -88,6 +88,14 @@
       matchUpdateTypes: ["patch"],
       addLabels: ["renovate-version-patch"],
       minimumReleaseAge: "3 days",
+      automerge: true,
+    },
+    // A pin replaces a range with the version already resolved in the lock
+    // file, so nothing new is installed and minimumReleaseAge has no release
+    // to measure.
+    {
+      matchUpdateTypes: ["pin"],
+      addLabels: ["renovate-version-pin"],
       automerge: true,
     },
     {
