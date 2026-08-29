@@ -1,0 +1,216 @@
+repository:
+  # `homepage` is per-repo and lives in `suborgs/product.yml`; an org-level
+  # value would point the meta repos at the product's docs site.
+  has_issues: true
+  has_wiki: false
+  has_projects: false
+  # Off (2026-08-17): a second venue for questions splits the audience while
+  # the project has no outside users to answer them.
+  has_discussions: false
+
+  # Squash-only. Merge commits and rebase both produce histories that break the
+  # assumption the release tooling depends on: that every commit on main is a
+  # Conventional Commits subject a version can be derived from.
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
+
+  # PR_TITLE, not COMMIT_OR_PR_TITLE (GitHub's default). The default uses the
+  # commit subject when a PR has exactly one commit -- so a PR whose title was
+  # checked by a semantic-PR-title workflow could still land with an unchecked
+  # subject line. PR_TITLE means the thing that was validated is the thing that
+  # lands.
+  squash_merge_commit_title: PR_TITLE
+  # COMMIT_MESSAGES, not BLANK: the squash body is what carries the
+  # `Signed-off-by:` trailers of the squashed commits onto main. DCO sign-off is
+  # required on every commit here, and BLANK would drop that record from the
+  # only history that survives a squash merge.
+  squash_merge_commit_message: COMMIT_MESSAGES
+
+  delete_branch_on_merge: true
+  allow_update_branch: true
+
+  # On since 2026-08-29. It was off for two reasons that have both expired:
+  # merging was manual through the web UI, and the product repo was private on
+  # a free plan, where platform auto-merge does not exist. The repo is public
+  # and `protect-main` now requires six checks, so auto-merge is what makes a
+  # green Renovate patch land without a human waiting on CI to go green.
+  # A PR still merges only when every required check passes and the review
+  # requirement is satisfied -- auto-merge waits, it does not bypass.
+  allow_auto_merge: true
+
+  web_commit_signoff_required: true
+
+  security:
+    enableVulnerabilityAlerts: true
+    # Renovate owns dependency PRs; Dependabot security fixes stay off to avoid two bots
+    # opening duplicate PRs for the same CVE.
+    enableAutomatedSecurityFixes: false
+
+# Ported from skillsgateway/skillsgateway `.github/settings.yml`, which was
+# retired in favour of this repo (see that PR and issue #23). Referenced by that
+# repo's `.github/labeler.yml`, which applies them by changed path --
+# actions/labeler does NOT create labels and errors on any that do not exist, so
+# these must exist before that workflow can work. GitHub issue forms and
+# Renovate silently drop labels that do not exist, with the same consequence.
+#
+# WARNING: safe-settings is declarative about labels -- a label that exists on a
+# repo but is absent from this list is DELETED on the next sync unless it
+# matches an `exclude` pattern. Do not prune entries here to tidy the file.
+#
+# These live at org level (not in a per-repo `repos/*.yml`) because
+# skillsgateway/skillsgateway is the only repo in safe-settings' scope; `.github`
+# and `.github-private` are excluded in deployment-settings.yml. Adding a second
+# product repo to the org means splitting the subsystem labels out per repo.
+labels:
+  include:
+    # ---------------------------------------------------------------
+    # Subsystems, mapped to the package layout under
+    # src/main/java/io/github/jimisola/skillsgateway/. One glob per label in
+    # labeler.yml, so files moving within a subsystem need no change here.
+    # ---------------------------------------------------------------
+    - name: ingestion
+      color: "1d76db"
+      description: "Quarantined ingestion: upstream fetch, manifests, snapshots"
+    - name: vetting
+      color: "5319e7"
+      description: "Vetting connectors, findings, re-vetting and quarantine"
+    - name: approval
+      color: "b60205"
+      description: "ApprovalService and the publish path"
+    - name: facade
+      color: "d93f0b"
+      description: "Read-only git smart-HTTP facade"
+    - name: audit
+      color: "0e8a16"
+      description: "Append-only audit ledger, export and sinks"
+    - name: auth
+      color: "b60205"
+      description: "PAT and OIDC authentication, tokens, security config"
+    - name: persistence
+      color: "bfd4f2"
+      description: "Entities, repositories and schema migrations"
+    - name: retention
+      color: "c5def5"
+      description: "Retention policy and scheduling"
+    - name: storage
+      color: "bfd4f2"
+      description: "Git storage backends"
+    - name: admin
+      color: "fbca04"
+      description: "Admin surface and marketplace registration"
+    - name: api
+      color: "1d76db"
+      description: "REST API, OpenAPI and SPA routing"
+    - name: webhook
+      color: "d4c5f9"
+      description: "Webhook dispatch and signing"
+    - name: config
+      color: "ededed"
+      description: "Application configuration and properties"
+    - name: portal
+      color: "6f42c1"
+      description: "React/Vite portal"
+
+    # ---------------------------------------------------------------
+    # Cross-cutting
+    # ---------------------------------------------------------------
+    - name: tests
+      color: "c2e0c6"
+      description: "Test suite"
+    - name: ci
+      color: "000000"
+      description: "CI/CD workflows and repo tooling"
+    - name: deployment
+      color: "5d0811"
+      description: "Dockerfile, compose files and the Helm chart"
+    - name: openspec
+      color: "e99695"
+      description: "OpenSpec proposals, specs and archives"
+    - name: reqstool
+      color: "f9d0c4"
+      description: "Requirements and traceability (docs/reqstool)"
+    - name: dependencies
+      color: "0366d6"
+      description: "Dependency updates"
+
+    # ---------------------------------------------------------------
+    # A warning, not a classification. Deliberately loud. CLAUDE.md holds
+    # changes here to a higher bar: adversarial and negative tests, and the
+    # old-coder evidence discipline -- not just happy-path coverage. The label
+    # makes that visible on the PR list rather than only to whoever remembers.
+    #
+    # The companion "⚠️ REPO SETTINGS" label was dropped when
+    # `.github/settings.yml` was retired: repository settings are no longer
+    # changeable from that repo, so no diff there can carry the warning. The
+    # equivalent safeguard is that every change in THIS repo is a settings
+    # change by definition.
+    # ---------------------------------------------------------------
+    - name: "⚠️ TRUST BOUNDARY"
+      color: "b60205"
+      description: "⚠️ Touches facade auth, ApprovalService, or the registration allowlist"
+
+    # ---------------------------------------------------------------
+    # Applied by the issue templates in skillsgateway/.github, and by Renovate
+    # itself -- not by labeler.yml.
+    # ---------------------------------------------------------------
+    - name: triage
+      color: "ededed"
+      description: "New issue awaiting triage"
+    - name: bot-renovate
+      color: "5319e7"
+      description: "Opened by Renovate"
+    - name: bot-renovate-stop
+      color: "5d0811"
+      description: "Renovate: stop updating this PR (add it yourself to pin a PR)"
+    - name: bot-renovate-rebase
+      color: "7057ff"
+      description: "Renovate: recreate this PR's branch on the next run (consumed and removed by Renovate)"
+    - name: security
+      color: "b60205"
+      description: "Vulnerability alert / security update"
+    - name: renovate-version-major
+      color: "d73a4a"
+      description: "Major version update (breaking risk; never auto-merged)"
+    - name: renovate-version-minor
+      color: "fbca04"
+      description: "Minor version update"
+    - name: renovate-version-patch
+      color: "0e8a16"
+      description: "Patch version update"
+    - name: renovate-version-digest
+      color: "c5def5"
+      description: "Digest/SHA pin update (never auto-merged)"
+
+    # ---------------------------------------------------------------
+    # GitHub's defaults, restated so this file is the whole picture rather than
+    # a diff against whatever the repo happened to start with. `duplicate`,
+    # `invalid` and `wontfix` are dropped -- closing with a comment says more.
+    # ---------------------------------------------------------------
+    - name: bug
+      color: "d73a4a"
+      description: "Something isn't working"
+    - name: documentation
+      color: "0075ca"
+      description: "Improvements or additions to documentation"
+    - name: enhancement
+      color: "a2eeef"
+      description: "New feature or request"
+    - name: "good first issue"
+      color: "7057ff"
+      description: "Good for newcomers"
+    - name: "help wanted"
+      color: "008672"
+      description: "Extra attention is needed"
+    - name: question
+      color: "d876e3"
+      description: "Further information is requested"
+    - name: accessibility
+      color: "f143ab"
+      description: "Barrier affecting people with disabilities"
+
+# NOTE: `rulesets` are defined in suborgs/all.yml, not here. A top-level
+# rulesets block in this org-level settings.yml is created as an
+# ORGANIZATION ruleset, which requires GitHub Team. This is a free org,
+# so rulesets are defined at suborg scope to create per-repo rulesets
+# (free) instead. (Pattern copied from reqstool/.github-private.)
