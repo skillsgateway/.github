@@ -150,6 +150,13 @@ labels:
       color: "b60205"
       description: "⚠️ Touches facade auth, ApprovalService, or the registration allowlist"
 
+    # Hand-applied, and required by the contract gate's decision table in
+    # skillsgateway/skillsgateway: without it here, the next sync deletes the
+    # label and the gate can no longer be satisfied.
+    - name: "⚠️ BREAKING CONTRACT"
+      color: "b60205"
+      description: "⚠️ Deliberate breaking change to the /api/** contract; ships as a major"
+
     # ---------------------------------------------------------------
     # Applied by the issue templates in skillsgateway/.github, and by Renovate
     # itself -- not by labeler.yml.
