@@ -52,8 +52,18 @@ rulesets:
         parameters:
           strict_required_status_checks_policy: false
           required_status_checks:
-            # The PR gates. integration 15368 is GitHub Actions, so a check of
-            # the same name from another app cannot satisfy them.
+            # Every check that runs on every PR is required -- this list is
+            # what makes Renovate's `platformAutomerge: true` safe, since
+            # GitHub auto-merge waits for required checks alone (see the
+            # shared preset). A workflow added to the repo is added here in
+            # the same PR. Path-filtered workflows (docs-preview,
+            # renovate-config) stay out: a required check that does not run
+            # blocks the PR forever.
+            #
+            # integration_id pins the app: 15368 is GitHub Actions, 57789
+            # GitHub Advanced Security (CodeQL default setup), 1861 the DCO
+            # App. A check of the same name from another app cannot satisfy
+            # them.
             #
             # A context GitHub has never seen blocks every PR, so a new check
             # here must have run at least once on a real PR before it is added.
@@ -80,6 +90,21 @@ rulesets:
             # which made the contract advisory rather than enforced.
             - context: Breaking change detection
               integration_id: 15368
+            - context: Apply subsystem labels
+              integration_id: 15368
+            # CodeQL default setup: one `CodeQL` check from Advanced Security
+            # plus one `Analyze (<language>)` job per configured language.
+            # Enabling a language in code-scanning settings adds a job here.
+            - context: CodeQL
+              integration_id: 57789
+            - context: Analyze (actions)
+              integration_id: 15368
+            - context: Analyze (java-kotlin)
+              integration_id: 15368
+            - context: Analyze (javascript-typescript)
+              integration_id: 15368
+            - context: DCO
+              integration_id: 1861
 
 # Environments the release flow binds to (issue #23: reqstool binds its
 # release approval gate to `stable`; same shape here for when the release

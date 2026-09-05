@@ -46,3 +46,14 @@ rulesets:
           require_code_owner_review: false
           require_last_push_approval: false
           required_review_thread_resolution: true
+      # Renovate opens PRs here too (action pins), and the shared preset's
+      # `platformAutomerge: true` merges the moment the ruleset is satisfied,
+      # so every check that runs on every PR must be required. That is only
+      # DCO (App 1861): `validate-renovate` is path-filtered to the preset
+      # and would block any PR it does not run on.
+      - type: required_status_checks
+        parameters:
+          strict_required_status_checks_policy: false
+          required_status_checks:
+            - context: DCO
+              integration_id: 1861
