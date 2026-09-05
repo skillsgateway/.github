@@ -106,10 +106,11 @@
     // =====================================================
     // GitHub Actions.
     //
-    // Commit metadata only — no automerge. Actions are SHA-pinned precisely so
-    // a re-pointed upstream tag cannot silently change what runs, and
-    // minimumReleaseAge does not cover that case: re-pointing a tag on an
-    // existing release creates no new release for the age check to measure.
+    // Commit metadata only; the tier rules above decide automerge. A bump to a
+    // new release of a SHA-pinned action is a minor/patch and automerges. A
+    // re-pointed tag with no new release is a digest update and stays manual:
+    // that is the supply-chain case SHA pinning exists to catch, and
+    // minimumReleaseAge has no release to measure there.
     // =====================================================
     {
       matchManagers: ["github-actions"],
@@ -119,16 +120,17 @@
   ],
 
   // =====================================================
-  // Automerge: minor and patch only.
+  // Automerge: minor, patch and pin only.
   //
-  // `platformAutomerge: false` means Renovate merges the PR itself on its next
-  // run rather than asking GitHub to auto-merge it. Both wait for CI, but they
-  // wait for different things: GitHub's auto-merge waits only for the checks
-  // `protect-main` lists as required, while Renovate waits for the branch to be
-  // green outright. That difference covers CodeQL and the DCO check, which run
-  // on every PR and are not in the required set -- and it means adding a new
-  // workflow does not silently fall outside the automerge gate until someone
-  // remembers to require it.
+  // `platformAutomerge: true` hands the merge to GitHub's auto-merge, which
+  // fires the moment the ruleset is satisfied. With `false` (#5) Renovate
+  // merged on its own next run, and on the hosted app that left a green PR
+  // open for hours. The switch is only safe because `protect-main` requires
+  // EVERY check that runs on a PR (safe-settings/suborgs/*.yml): GitHub
+  // auto-merge waits for required checks alone, and with none required a PR
+  // merges before CI has run -- reqstool/.github#111 landed three failing
+  // builds on a main that way. So a workflow added to a consuming repo must
+  // become a required check in the same PR.
   //
   // The approving review the ruleset requires comes from the renovate-approve
   // App, which only ever approves PRs authored by Renovate. Renovate itself has
@@ -138,8 +140,11 @@
   // Major stays manual: a major is a behaviour change worth a human reading the
   // changelog, and `minimumReleaseAge: 7 days` already says these are not
   // urgent. Digests stay manual because a re-pointed tag is the supply-chain
-  // case SHA pinning exists to catch.
+  // case SHA pinning exists to catch. minimumReleaseAge is applied before a
+  // PR is opened (internalChecksFilter: strict, the default), so it does not
+  // depend on `renovate/stability-days` being a required status -- and it must
+  // not be one, as that status never appears on a human PR.
   // =====================================================
   automergeType: "pr",
-  platformAutomerge: false,
+  platformAutomerge: true,
 }
