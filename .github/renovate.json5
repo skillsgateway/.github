@@ -13,7 +13,8 @@
 //
 //   bot-renovate, bot-renovate-stop, bot-renovate-rebase, security,
 //   renovate-version-major, renovate-version-minor,
-//   renovate-version-patch, renovate-version-pin, renovate-version-digest
+//   renovate-version-patch, renovate-version-pin, renovate-version-digest,
+//   renovate-version-lockfile
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
 
@@ -101,6 +102,26 @@
     {
       matchUpdateTypes: ["digest"],
       addLabels: ["renovate-version-digest"],
+    },
+    // lockFileMaintenance is its own updateType and matches none of the five tiers
+    // above, so without this rule its PRs carry no version label and never automerge --
+    // they queue for a human invisibly and cannot even be filtered for.
+    //
+    // It automerges, and that is a deliberate exception rather than an oversight:
+    // minimumReleaseAge CANNOT apply here at all, because Renovate delegates the
+    // regeneration to the package manager and never sees the individual transitive
+    // versions. So the choice was automerge with no soak or do not automerge, and the
+    // soak was never on the table. CI is the gate that remains, and a wholesale lockfile
+    // refresh that builds and tests green is the ordinary case.
+    //
+    // What this trades away, stated so nobody has to rediscover it: with
+    // rangeStrategy "pin" every declared dependency is frozen, so a lockFileMaintenance
+    // PR is the only path by which TRANSITIVE dependencies ever change -- which makes it
+    // the one place a freshly compromised transitive release would have been caught.
+    {
+      matchUpdateTypes: ["lockFileMaintenance"],
+      addLabels: ["renovate-version-lockfile"],
+      automerge: true,
     },
 
     // =====================================================

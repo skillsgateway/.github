@@ -188,6 +188,9 @@ labels:
     - name: renovate-version-pin
       color: "c2e0c6"
       description: "Range pinned to the already-resolved exact version"
+    - name: renovate-version-lockfile
+      color: "d4c5f9"
+      description: "Wholesale lockfile refresh (transitive dependencies)"
     - name: renovate-version-digest
       color: "c5def5"
       description: "Digest/SHA pin update (never auto-merged)"
