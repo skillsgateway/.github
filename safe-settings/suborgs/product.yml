@@ -21,26 +21,19 @@ rulesets:
       ref_name:
         include: ["~DEFAULT_BRANCH"]
         exclude: []
-    bypass_actors:
-      # Sole-maintainer org: the 1-approval review requirement below is
-      # real four-eyes only when a second reviewer exists; until then the
-      # org admin bypasses it at merge time (deliberate, per issue #23).
-      #
-      # Renovate deliberately gets NO bypass here, unlike reqstool. A
-      # `pull_request` bypass would exempt its PRs from the required checks
-      # too, and auto-merge would then land a dependency bump the moment it is
-      # mergeable rather than when CI is green. The review requirement is
-      # satisfied by the renovate-approve App instead, which leaves every check
-      # enforced.
-      - actor_id: 1
-        actor_type: OrganizationAdmin
-        bypass_mode: always
+    # No bypass (skillsgateway#547). The author cannot approve their own PR, so a
+    # required review was satisfied only by an `always` admin bypass, which also
+    # skipped every check and allowed direct pushes. Required checks are now the
+    # gate nobody can step around; an emergency means editing this ruleset.
+    bypass_actors: []
     rules:
       - type: deletion
       - type: non_fast_forward
       - type: pull_request
         parameters:
-          required_approving_review_count: 1
+          # 0: there is no second reviewer (skillsgateway#547). The rule stays
+          # for thread resolution.
+          required_approving_review_count: 0
           dismiss_stale_reviews_on_push: true
           require_code_owner_review: false
           require_last_push_approval: false
@@ -105,6 +98,20 @@ rulesets:
               integration_id: 15368
             - context: DCO
               integration_id: 1861
+
+  # The git tag is the release version (release.yml), so a pushed tag must never
+  # move or disappear. Creating one stays open: release.yml creates them.
+  - name: protect-tags
+    target: tag
+    enforcement: active
+    conditions:
+      ref_name:
+        include: ["~ALL"]
+        exclude: []
+    bypass_actors: []
+    rules:
+      - type: deletion
+      - type: update
 
 # Environments the release flow binds to (issue #23: reqstool binds its
 # release approval gate to `stable`; same shape here for when the release
