@@ -157,6 +157,13 @@ labels:
       color: "b60205"
       description: "⚠️ Deliberate breaking change to the /api/** contract; ships as a major"
 
+    # Hand-applied, and required by the pr-screenshots check in
+    # skillsgateway/skillsgateway: the declared exception for a portal change
+    # with nothing visible to photograph.
+    - name: no-screenshots
+      color: "ededed"
+      description: "Portal change with nothing visible: exempt from the before/after screenshots check"
+
     # ---------------------------------------------------------------
     # Applied by the issue templates in skillsgateway/.github, and by Renovate
     # itself -- not by labeler.yml.
