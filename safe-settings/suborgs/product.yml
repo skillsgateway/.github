@@ -22,25 +22,27 @@ rulesets:
         include: ["~DEFAULT_BRANCH"]
         exclude: []
     bypass_actors:
-      # Sole-maintainer org: the 1-approval review requirement below is
-      # real four-eyes only when a second reviewer exists; until then the
-      # org admin bypasses it at merge time (deliberate, per issue #23).
+      # `pull_request`, not `always`: no direct push to main, but the org admin
+      # can still merge a red PR as an explicit, logged bypass -- the emergency
+      # route when an external check is stuck (issue #547). Owner PRs need no
+      # bypass at all now that no approving review is required.
       #
       # Renovate deliberately gets NO bypass here, unlike reqstool. A
       # `pull_request` bypass would exempt its PRs from the required checks
       # too, and auto-merge would then land a dependency bump the moment it is
-      # mergeable rather than when CI is green. The review requirement is
-      # satisfied by the renovate-approve App instead, which leaves every check
-      # enforced.
+      # mergeable rather than when CI is green.
       - actor_id: 1
         actor_type: OrganizationAdmin
-        bypass_mode: always
+        bypass_mode: pull_request
     rules:
       - type: deletion
       - type: non_fast_forward
       - type: pull_request
         parameters:
-          required_approving_review_count: 1
+          # 0: GitHub does not let an author approve their own PR, so in a
+          # sole-maintainer org a required review was satisfied only by the
+          # bypass, which skipped every check with it (issue #547).
+          required_approving_review_count: 0
           dismiss_stale_reviews_on_push: true
           require_code_owner_review: false
           require_last_push_approval: false
@@ -105,6 +107,21 @@ rulesets:
               integration_id: 15368
             - context: DCO
               integration_id: 1861
+
+  # "The git tag is the only version" (release.yml): a release tag can be
+  # created, never moved or deleted. A wrong tag is fixed by a new release.
+  # No bypass, and `~ALL` rather than `refs/tags/*`, whose `*` stops at `/`.
+  - name: protect-tags
+    target: tag
+    enforcement: active
+    conditions:
+      ref_name:
+        include: ["~ALL"]
+        exclude: []
+    bypass_actors: []
+    rules:
+      - type: deletion
+      - type: update
 
 # Environments the release flow binds to (issue #23: reqstool binds its
 # release approval gate to `stable`; same shape here for when the release

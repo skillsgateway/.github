@@ -35,13 +35,14 @@ rulesets:
     bypass_actors:
       - actor_id: 1
         actor_type: OrganizationAdmin
-        bypass_mode: always
+        # Same as protect-main in product.yml (issue #547).
+        bypass_mode: pull_request
     rules:
       - type: deletion
       - type: non_fast_forward
       - type: pull_request
         parameters:
-          required_approving_review_count: 1
+          required_approving_review_count: 0
           dismiss_stale_reviews_on_push: true
           require_code_owner_review: false
           require_last_push_approval: false
