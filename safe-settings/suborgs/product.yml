@@ -106,6 +106,20 @@ rulesets:
             - context: DCO
               integration_id: 1861
 
+  # The git tag is the release version (release.yml), so a pushed tag must never
+  # move or disappear. Creating one stays open: release.yml creates them.
+  - name: protect-tags
+    target: tag
+    enforcement: active
+    conditions:
+      ref_name:
+        include: ["~ALL"]
+        exclude: []
+    bypass_actors: []
+    rules:
+      - type: deletion
+      - type: update
+
 # Environments the release flow binds to (issue #23: reqstool binds its
 # release approval gate to `stable`; same shape here for when the release
 # workflow lands).
