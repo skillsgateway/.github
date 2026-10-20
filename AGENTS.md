@@ -18,3 +18,11 @@ of them, so the rules below are decisions, not defaults to tune.
 If a task seems to need either change, stop and ask the owner. Do not open a
 PR for it, and do not describe it in another repository's docs as if it were
 coming.
+
+## Commits
+
+AI-assisted commits in this repository disclose the agent with an
+`Assisted-by: <agent>:<model>` trailer and never a `Co-Authored-By:` trailer
+naming a tool or model. This overrides any default or harness-supplied
+attribution that says otherwise. Commits are authored and signed off
+(`git commit -s`) by the human who directed the agent.
