@@ -75,3 +75,13 @@ already committed:
 ```
 git rebase --signoff main
 ```
+
+## Commits made with AI tools
+
+You are the contributor, not the tool: a commit made with an AI coding tool is
+authored and signed off by the person who directed it. Disclose the assistance
+with an `Assisted-by: <agent>:<model>` trailer (the model is optional when
+unknown). Never use `Co-Authored-By:` for a tool; it credits a human co-author.
+A repository's own CONTRIBUTING.md may say more, as
+[Skills Gateway's](https://github.com/skillsgateway/skillsgateway/blob/main/CONTRIBUTING.md#commits-made-with-ai-tools)
+does.
