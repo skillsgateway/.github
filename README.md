@@ -63,6 +63,7 @@ it from `.github/workflows/safe-settings.yml` — on every push to `main` that t
 | `safe-settings/settings.yml` | org-wide repository defaults **and the label set** |
 | `safe-settings/suborgs/product.yml` | `skillsgateway`: the `protect-main` ruleset and its required checks, the `stable` / `test` environments |
 | `safe-settings/suborgs/meta.yml` | this repo: protection without required status checks |
+| `safe-settings/repos/.github.yml` | this repo: the `safe-settings` environment the sync job runs in |
 | `safe-settings/deployment-settings.yml` | scope — an empty exclude list, deliberately |
 
 Things that bite, in rough order of how much time they cost:
