@@ -42,7 +42,7 @@
   // The inverse. Renamed only to match the label above; the default is "rebase".
   rebaseLabel: "bot-renovate-rebase",
 
-  dependencyDashboard: false,
+  dependencyDashboard: { enabled: false },
 
   prConcurrentLimit: 10,
   prHourlyLimit: 5,
