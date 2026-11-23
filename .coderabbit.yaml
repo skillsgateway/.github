@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# CodeRabbit AI review for the organization admin repo. Advisory only: it never
+# requests changes, and a bot approval does not count as the required review.
+#
+# safe-settings/ is applied to every repository on the next sync, so review
+# there is held to AGENTS.md (picked up by default), including the decisions
+# it lists as not to be proposed.
+language: en-US
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  # The PR body follows the organization template; keep the summary in the
+  # walkthrough comment.
+  high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  collapse_walkthrough: true
+  poem: false
+  review_status: true
+  sequence_diagrams: false
+  # Labels are declared in safe-settings; reviewers are the owner.
+  suggested_labels: false
+  suggested_reviewers: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+      - "WIP"
+    # Dependency bumps are gated by CI and auto-merged.
+    # `@coderabbitai review` on one of these PRs still forces a review.
+    ignore_usernames:
+      - "renovate[bot]"
+      - "dependabot[bot]"
+      - "github-actions[bot]"
+
+  path_instructions:
+    - path: "safe-settings/**"
+      instructions: |
+        Applied to every repository in the organization on the next sync.
+        Flag any change that weakens branch protection, rulesets, required
+        checks or tag protection, and any label removal that a repository's
+        .github/labeler.yml still references. Do not suggest lowering
+        required_approving_review_count or changing the OrganizationAdmin
+        bypass_mode; both are owner decisions recorded in AGENTS.md.
+    - path: ".github/workflows/**"
+      instructions: |
+        Reusable workflows are called from other repositories. Flag a newly
+        added third-party action not pinned to a commit SHA, broadened
+        permissions, and
+        pull_request_target or untrusted input reaching a shell.
+
+chat:
+  auto_reply: true
