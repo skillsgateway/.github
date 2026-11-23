@@ -17,6 +17,8 @@
 # that context -- and a required context a PR never produces blocks it forever.
 suborgrepos:
   - .github
+  # Central CodeRabbit configuration, read by the CodeRabbit app for every repo.
+  - coderabbit
 
 # Workaround for safe-settings shared-object mutation bug:
 # Without a suborg entry, all repos share the same repoConfig reference via
